@@ -14,29 +14,33 @@ const THEME = {
   glass: 'rgba(255, 255, 255, 0.1)'
 }
 
-const DINO_DATA = {
-  skin: {
-    title: "🦖 霸王龙皮肤秘密", enTitle: "SKIN TEXTURE SECRETS",
-    image: "/skin_info.webp", 
-    desc: "最新的研究发现，霸王龙并非全身只有冷冰冰的鳞片，它们颈部可能长着酷酷的原始羽毛！✨",
-    tags: ["#皮肤管理", "#原始羽毛"],
-    details: [{ icon: "🛡️", label: "防御系统 Defense", text: "坚硬角质层" }, { icon: "🎨", label: "颜色感知 Color", text: "可能拥有斑纹" }]
+// --- 💖 恐龙总数据库：在这里添加新恐龙 ---
+const DINO_LIST = [
+  {
+    id: "trex",
+    name: "霸王龙",
+    enName: "T-Rex",
+    thumb: "/thumb.webp", // 左侧的小缩略图
+    models: { skin: "/skin.glb", muscle: "/muscle.glb", bone: "/bone.glb" },
+    layers: {
+      skin: { title: "🦖 霸王龙皮肤秘密", enTitle: "SKIN TEXTURE SECRETS", image: "/skin_info.webp", desc: "最新的研究发现，霸王龙并非全身只有冷冰冰的鳞片。", tags: ["#皮肤管理", "#原始羽毛"], details: [{ icon: "🛡️", label: "防御系统 Defense", text: "坚硬角质层" }] },
+      muscle: { title: "💪 最强咬合力解析", enTitle: "POWERFUL BITE FORCE", image: "/muscle_info.webp", desc: "霸王龙拥有生物史上最恐怖的咬肌！", tags: ["#碎骨机", "#核心训练"], details: [{ icon: "🦷", label: "咬肌强度 Bite", text: "6吨恐怖咬合力" }] },
+      bone: { title: "🦴 中空骨骼黑科技", enTitle: "SKELETAL TECHNOLOGY", image: "/bone_info.webp", desc: "它的骨头是“中空气腔”结构！🕊️ 这种设计让它既轻盈又坚固。", tags: ["#中空骨骼", "#轻量化"], details: [{ icon: "🏗️", label: "结构 Structure", text: "蜂窝状轻量化" }] }
+    }
   },
-  muscle: {
-    title: "💪 最强咬合力解析", enTitle: "POWERFUL BITE FORCE",
-    image: "/muscle_info.webp",
-    desc: "霸王龙拥有生物史上最恐怖的咬肌！咬合力足以瞬间压碎一辆轿车 🚗。",
-    tags: ["#碎骨机", "#核心训练"],
-    details: [{ icon: "🦷", label: "咬肌强度 Bite", text: "6吨恐怖咬合力" }, { icon: "🏃", label: "爆发速度 Sprint", text: "强力后肢肌肉" }]
-  },
-  bone: {
-    title: "🦴 中空骨骼黑科技", enTitle: "SKELETAL TECHNOLOGY",
-    image: "/bone_info.webp",
-    desc: "它的骨头是“中空气腔”结构！🕊️ 这种设计让它既轻盈又坚固，简直是史前版大疆。",
-    tags: ["#中空骨骼", "#轻量化"],
-    details: [{ icon: "🏗️", label: "结构 Structure", text: "蜂窝状轻量化" }, { icon: "🫁", label: "呼吸 Respiratory", text: "气囊呼吸泵" }]
+  {
+    id: "triceratops",
+    name: "三角龙",
+    enName: "Triceratops",
+    thumb: "/tri_thumb.webp", // 你需要准备一张三角龙的小图放在 public
+    models: { skin: "/tri_skin.glb", muscle: "/tri_muscle.glb", bone: "/tri_bone.glb" }, // 你的三角龙模型路径
+    layers: {
+      skin: { title: "🛡️ 角龙类防御工事", enTitle: "DEFENSIVE SHIELD", image: "/tri_skin_info.webp", desc: "三角龙最引人注目的就是巨大的颈盾和三只尖角。", tags: ["#坦克级防御", "#颈盾之谜"], details: [{ icon: "🛡️", label: "颈盾结构 Shield", text: "实心骨质，防御颈部" }] },
+      muscle: { title: "💪 结实的四肢肌群", enTitle: "QUADRUPEDAL POWER", image: "/tri_muscle_info.webp", desc: "作为食草界的“重装坦克”，三角龙拥有极其强壮的前肢肌肉。", tags: ["#核心肌群", "#重装坦克"], details: [{ icon: "🦵", label: "负重力 Support", text: "支撑约 6-12 吨体重" }] },
+      bone: { title: "🦴 坚实的实心骨骼", enTitle: "SOLID BONE STRUCTURE", image: "/tri_bone_info.webp", desc: "不同于霸王龙的中空，三角龙的骨骼更加厚重、密实。", tags: ["#实心骨骼", "#稳如泰山"], details: [{ icon: "📐", label: "头骨比例 Skull", text: "头骨占体长约 1/3" }] }
+    }
   }
-}
+];
 
 function Loader() {
   const { progress } = useProgress()
@@ -45,12 +49,23 @@ function Loader() {
   )
 }
 
-function DinoModel({ val, isMobile }) {
-  const skinGLTF = useGLTF('/skin.glb')
-  const muscleGLTF = useGLTF('/muscle.glb')
-  const boneGLTF = useGLTF('/bone.glb')
-  const smoothVal = useRef(0)
+// 别忘了在文件最顶部加上这一行：
+// import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader'
 
+function DinoModel({ val, isMobile, modelPaths }) {
+  // 增加解压器配置，防止苹果端崩溃
+  const dracoConf = (loader) => {
+    const dracoLoader = new DRACOLoader()
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.5/')
+    loader.setDRACOLoader(dracoLoader)
+  }
+
+  // 使用带配置的加载器
+  const skinGLTF = useGLTF(modelPaths.skin, dracoConf)
+  const muscleGLTF = useGLTF(modelPaths.muscle, dracoConf)
+  const boneGLTF = useGLTF(modelPaths.bone, dracoConf)
+  
+  const smoothVal = useRef(0)
   useFrame(() => {
     smoothVal.current = THREE.MathUtils.lerp(smoothVal.current, val, 0.1)
     const v = smoothVal.current
@@ -60,7 +75,6 @@ function DinoModel({ val, isMobile }) {
       s.traverse(c => {
         if (c.isMesh) {
           c.material.transparent = true; c.material.opacity = op[i]; c.visible = op[i] > 0.01;
-          c.castShadow = false; c.receiveShadow = false;
         }
       })
     })
@@ -103,6 +117,10 @@ export default function App() {
   const [val, setVal] = useState(0)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024)
   const [viewerOpen, setViewerOpen] = useState(false)
+  
+  // --- 新增：记录当前选中的恐龙 (默认选第一只，即霸王龙) ---
+  const [activeDinoIndex, setActiveDinoIndex] = useState(0)
+  const activeDino = DINO_LIST[activeDinoIndex]
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 1024)
@@ -110,7 +128,8 @@ export default function App() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  const current = val < 60 ? DINO_DATA.skin : val < 140 ? DINO_DATA.muscle : DINO_DATA.bone
+  // 修改 current 的获取方式，从 activeDino 里拿数据
+  const current = val < 60 ? activeDino.layers.skin : val < 140 ? activeDino.layers.muscle : activeDino.layers.bone
 
   return (
     <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', width: '100vw', height: '100vh', background: THEME.bgGradient, color: THEME.textLight, overflow: isMobile ? 'auto' : 'hidden' }}>
@@ -123,13 +142,33 @@ export default function App() {
 
       {/* 1. 左侧栏 (仅电脑端) */}
       {!isMobile && (
-        <div style={{ width: '160px', padding: '100px 20px', borderRight: '1px solid rgba(255,255,255,0.05)', flexShrink: 0, background: 'rgba(0,0,0,0.2)' }}>
-          <h1 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '40px', color: THEME.accent }}>霸王龙</h1>
-          {['皮肤 SKIN', '肌肉 MUSCLE', '骨骼 BONE'].map((label, i) => (
-            <div key={label} style={{ padding: '15px 10px', borderRadius: '12px', marginBottom: '15px', fontSize: '11px', textAlign: 'center', background: val >= i*100-50 && val <= i*100+50 ? THEME.accent : 'rgba(255,255,255,0.05)', color: val >= i*100-50 && val <= i*100+50 ? '#fff' : '#666', fontWeight: 'bold', transition: '0.3s', cursor: 'pointer' }} onClick={() => setVal(i*100)}>{label}</div>
-          ))}
+  <div style={{ width: '180px', padding: '80px 15px', borderRight: '1px solid rgba(255,255,255,0.05)', flexShrink: 0, background: 'rgba(0,0,0,0.2)', overflowY: 'auto' }}>
+    {/* 1. 物种切换区 */}
+    <div style={{ marginBottom: '30px' }}>
+      <div style={{ fontSize: '10px', color: THEME.accent, fontWeight: 'bold', marginBottom: '15px' }}>物种库 SPECIES</div>
+      {DINO_LIST.map((dino, index) => (
+        <div key={dino.id} 
+          onClick={() => { setActiveDinoIndex(index); setVal(0); }} 
+          style={{ 
+            display: 'flex', alignItems: 'center', gap: '10px', padding: '10px', borderRadius: '12px', marginBottom: '10px', cursor: 'pointer',
+            background: activeDinoIndex === index ? 'rgba(230, 126, 34, 0.2)' : 'transparent',
+            border: activeDinoIndex === index ? `1px solid ${THEME.accent}` : '1px solid transparent'
+          }}>
+          <img src={dino.thumb} style={{ width: '30px', height: '30px', borderRadius: '6px', objectFit: 'cover' }} />
+          <div style={{ fontSize: '12px', fontWeight: 'bold', color: activeDinoIndex === index ? '#fff' : '#666' }}>{dino.name}</div>
         </div>
-      )}
+      ))}
+    </div>
+
+    {/* 2. 原有的层级切换区 */}
+    <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }}>
+      <div style={{ fontSize: '10px', color: '#444', fontWeight: 'bold', marginBottom: '15px' }}>解剖层 LAYERS</div>
+      {['皮肤 SKIN', '肌肉 MUSCLE', '骨骼 BONE'].map((label, i) => (
+        <div key={label} style={{ padding: '12px 10px', borderRadius: '10px', marginBottom: '10px', fontSize: '10px', textAlign: 'center', background: val >= i*100-50 && val <= i*100+50 ? THEME.accent : 'rgba(255,255,255,0.05)', color: val >= i*100-50 && val <= i*100+50 ? '#fff' : '#666', fontWeight: 'bold', cursor: 'pointer' }} onClick={() => setVal(i*100)}>{label}</div>
+      ))}
+    </div>
+  </div>
+)}
 
       {/* 2. 中间 3D 画布 */}
       <div style={{ flex: 1, position: 'relative', height: isMobile ? '55vh' : 'auto', minHeight: isMobile ? '400px' : 'auto' }}>
@@ -137,7 +176,15 @@ export default function App() {
           <ambientLight intensity={2.5} /> {/* 增加环境光亮度 */}
           <pointLight position={[10, 10, 10]} intensity={2} color={THEME.accent} /> {/* 加入琥珀色调点光源 */}
           <spotLight position={[-10, 10, 10]} intensity={1} />
-          <Suspense fallback={<Loader />}><DinoModel val={val} isMobile={isMobile} /></Suspense>
+          <Suspense fallback={<Loader />}>
+  {/* key 极其重要！它能保证切换恐龙时模型重新加载，而不是叠在一起 */}
+  <DinoModel 
+    key={activeDino.id} 
+    val={val} 
+    isMobile={isMobile} 
+    modelPaths={activeDino.models} 
+  />
+</Suspense>
           <OrbitControls makeDefault enableDamping minDistance={5} maxDistance={15} />
         </Canvas>
 
