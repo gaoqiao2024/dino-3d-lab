@@ -9,7 +9,7 @@ const DINO_DATA = {
   skin: {
     title: "皮肤纹理与原始羽毛细节",
     en: "SKIN TEXTURE & PROTO-FEATHERS",
-    image: "/skin_info.jpg", 
+    image: "/skin_info.webp", 
     desc: "霸王龙的外部包络不仅是防御屏障，更是复杂的生物感官系统。通过高倍率显微研究，我们还原了其从鳞片到原始羽毛的演化细节。",
     features: ["皮肤剖面结构图", "鳞片纹理放大图", "原始羽毛细节", "角质外层特写", "鳞片类型对比"],
     stats: [{ label: "主要成分", value: "角质化鳞片" }, { label: "羽毛分布", value: "颈/手臂/尾部" }]
@@ -17,7 +17,7 @@ const DINO_DATA = {
   muscle: {
     title: "肌肉结构与咬合力分析",
     en: "MUSCLE & BITE FORCE ANALYSIS",
-    image: "/muscle_info.jpg",
+    image: "/muscle_info.webp",
     desc: "霸王龙的肌肉系统是史前生物力学的巅峰。其巨大的咬肌和稳固的后肢肌群，使其具备了摧毁任何生物防御的恐怖力量。",
     features: ["全身肌肉解剖图", "咬合力热力分布", "最大咬合力 12,800 lbf", "肌肉纤维方向示意", "肌肉显微结构"],
     stats: [{ label: "爆发推力", value: "约 8.0 吨" }, { label: "咬合压力", value: "极高" }]
@@ -25,7 +25,7 @@ const DINO_DATA = {
   bone: {
     title: "骨骼结构与中空骨骼解析",
     en: "SKELETAL & PNEUMATIC SYSTEM",
-    image: "/bone_info.jpg",
+    image: "/bone_info.webp",
     desc: "霸王龙的骨骼在演化中实现了极致的‘轻量化’。这种源自兽脚类恐龙的中空骨骼结构，是其保持敏捷与高效呼吸的基础。",
     features: ["完整化石骨架重建", "气腔骨剖面放大", "骨壁与气腔结构", "化石纹理特写", "呼吸系统关联示意"],
     stats: [{ label: "骨架特性", value: "气腔化" }, { label: "呼吸关联", value: "单向气囊" }]
