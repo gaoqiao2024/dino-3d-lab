@@ -151,7 +151,7 @@ export default function App() {
           <spotLight position={[10, 15, 10]} intensity={2} />
           <Suspense fallback={<Html center>载入中...</Html>}>
             <DinoModel val={val} />
-            <Environment preset="studio" />
+            <Environment preset="city" /> // city 通常比 studio 轻量
             <ContactShadows position={[0, -1.2, 0]} opacity={0.2} scale={15} blur={3} />
           </Suspense>
           <OrbitControls makeDefault enableDamping />
